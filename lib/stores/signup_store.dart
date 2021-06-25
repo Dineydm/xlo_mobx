@@ -1,7 +1,9 @@
+import 'package:get_it/get_it.dart';
 import 'package:mobx/mobx.dart';
 import 'package:xlo_mobx/helpers/extensions.dart';
 import 'package:xlo_mobx/models/user.dart';
 import 'package:xlo_mobx/repositories/user_repository.dart';
+import 'package:xlo_mobx/stores/user_manager_store.dart';
 
 part 'signup_store.g.dart';
 
@@ -109,6 +111,9 @@ abstract class _SignupStore with Store {
   @observable
   bool loading = false;
 
+  @observable
+  String error;
+
   @action
   Future<void> _signUp() async {
     loading = true;
@@ -120,7 +125,12 @@ abstract class _SignupStore with Store {
       password: pass1
     );
 
-    await UserRepository().signUp(user);
+    try {
+      final resultUser = await UserRepository().signUp(user);
+      GetIt.I<UserManagerStore>().setUser(resultUser);
+    } catch (e) {
+      error = e;
+    }
 
     loading = false;
   }
